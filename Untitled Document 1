@@ -1,0 +1,78 @@
+//Q1)find the fcfs struct process TAT BT?
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Process {
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+
+void fcfs(struct Process processes[], int n) {
+    int current_time = 0;
+    for (int i = 0; i < n; i++) {
+        if (current_time < processes[i].arrival_time) {
+            current_time = processes[i].arrival_time;
+        }
+        processes[i].completion_time = current_time + processes[i].burst_time;
+        processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
+        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
+        current_time = processes[i].completion_time + 2; // Fixed I/O waiting time
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    printf("Enter arrival time and initial burst time for each process:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d %d", &processes[i].arrival_time, &processes[i].burst_time);
+    }
+
+    // Sort processes by arrival time
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (processes[j].arrival_time > processes[j + 1].arrival_time) {
+                struct Process temp = processes[j];
+                processes[j] = processes[j + 1];
+                processes[j + 1] = temp;
+            }
+        }
+    }
+
+    fcfs(processes, n);
+
+    printf("\nGantt Chart:\n");
+    int current_time = 0;
+    for (int i = 0; i < n; i++) {
+        printf("%d-%d: P%d ", current_time, processes[i].completion_time, i + 1);
+        current_time = processes[i].completion_time + 2; // Fixed I/O waiting time
+    }
+
+    printf("\n\nTurnaround Times:\n");
+    double avg_turnaround_time = 0;
+    for (int i = 0; i < n; i++) {
+        printf("P%d: %d ", i + 1, processes[i].turnaround_time);
+        avg_turnaround_time += processes[i].turnaround_time;
+    }
+    avg_turnaround_time /= n;
+
+    printf("\n\nWaiting Times:\n");
+    double avg_waiting_time = 0;
+    for (int i = 0; i < n; i++) {
+        printf("P%d: %d ", i + 1, processes[i].waiting_time);
+        avg_waiting_time += processes[i].waiting_time;
+    }
+    avg_waiting_time /= n;
+
+    printf("\n\nAverage Turnaround Time: %.2lf\n", avg_turnaround_time);
+    printf("Average Waiting Time: %.2lf\n", avg_waiting_time);
+
+    return 0;
+}
